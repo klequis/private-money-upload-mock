@@ -10,11 +10,11 @@ import {
   DropDiv,
   DropMsgDiv,
   ButtonDiv,
-  OnlyCSVMsgDiv,
-  Box
+  OnlyCSVMsgDiv
 } from './uploadFilesStyles'
 import { FileLists } from './FileLists'
 import { accounts } from './accounts'
+import { DropZone } from './DropZone'
 
 import { RejectedFilesWarning } from './RejectedFilesWarning'
 
@@ -84,22 +84,39 @@ export const UploadFiles = () => {
   // console.log('_files', _files)
 
   return (
-    <div class="container">
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4">
-        <div class="col">
-          <Box>1</Box>
-        </div>
-        <div class="col">
-          <Box>2</Box>
-        </div>
-        <div class="col">
-          <Box>3</Box>
-        </div>
-        <div class="col">
-          <Box>4</Box>
-        </div>
-      </div>
-    </div>
+    <UploadFilesDiv id="UploadFilesDiv">
+      <AccountsDiv>
+        {accounts.map((a) => {
+          return (
+            <DropZone
+              dropRef={_dropRef}
+              getRootProps={getRootProps}
+              getInputProps={getInputProps}
+              account={a}
+            />
+          )
+        })}
+      </AccountsDiv>
+      {_resultsLength > 0 ? <ResultTable files={_results} /> : null}
+
+      {_resultsLength === 0 && _rejectedLength > 0 ? (
+        <RejectedFilesWarning
+          acceptCount={_acceptedLength}
+          rejectCount={_rejectedLength}
+        />
+      ) : null}
+
+      {_resultsLength === 0 && (_acceptedLength > 0 || _rejectedLength > 0) ? (
+        <>
+          <FileLists files={_files} />
+          <ButtonDiv>
+            <Button onClick={_uploadClick} disabled={_showPleaseSelectFiles}>
+              Upload
+            </Button>
+          </ButtonDiv>
+        </>
+      ) : null}
+    </UploadFilesDiv>
   )
 }
 
@@ -131,39 +148,3 @@ async function customFileGetter(event) {
   console.log('fileList', fileList)
   return R.map(updateAcceptProp, fileList)
 }
-
-/*
-{accounts.map((a) => (
-        <>
-          <div class="row">
-            <div class="col-md-8">
-              <Box>1</Box>
-            </div>
-            <div class="col-6 col-md-4">
-              <Box>2</Box>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-6 col-md-8">
-              <Box>5</Box>
-            </div>
-            <div class="col-6 col-md-8">
-              <Box>6</Box>
-            </div>
-            <div class="col-6 col-md-8">
-              <Box>7</Box>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-8">
-              <Box>8</Box>
-            </div>
-            <div class="col-md-8">
-              <Box>9</Box>
-            </div>
-          </div>
-        </>
-      ))}
-*/
