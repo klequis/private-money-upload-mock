@@ -1,12 +1,14 @@
+import { useRef } from 'react'
 import { DropDiv, DropMsgDiv, OnlyCSVMsgDiv } from './uploadFilesStyles'
 
-export const DropZone = ({ dropRef, getRootProps, getInputProps, account }) => {
+export const DropZone = ({ getRootProps, getInputProps, account }) => {
+  const _dropRef = useRef()
   return (
     <div className="card">
       <div className="card-body">
         <h5 className="card-title">{account.acctName}</h5>
         <h6>x{account.acctNumber}</h6>
-        <DropDiv id="DropDiv1" {...getRootProps()} ref={dropRef}>
+        <DropDiv id="DropDiv1" {...getRootProps()} ref={_dropRef}>
           <input {...getInputProps()} />
           <DropMsgDiv>
             <div>

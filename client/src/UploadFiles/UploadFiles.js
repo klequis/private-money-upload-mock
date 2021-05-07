@@ -44,7 +44,6 @@ export const UploadFiles = () => {
   const [_results, _setResults] = useState([])
   const [_showPleaseSelectFiles, _setShowPleaseSelectFiles] = useState(false)
 
-  const _dropRef = useRef()
   const _acceptedLength = _files.accepted.length
   const _rejectedLength = _files.rejected.length
   const _totalSelected = _acceptedLength + _rejectedLength
@@ -89,7 +88,6 @@ export const UploadFiles = () => {
         {accounts.map((a) => {
           return (
             <DropZone
-              dropRef={_dropRef}
               getRootProps={getRootProps}
               getInputProps={getInputProps}
               account={a}
