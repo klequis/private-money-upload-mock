@@ -12,7 +12,8 @@ export const DropZone = ({ getRootProps, getInputProps, account }) => {
           <input {...getInputProps()} />
           <DropMsgDiv>
             <div>
-              Add files for {account.acctName} ({account.acctNumber})
+              Drop files or click to add Add files for {account.acctName} (
+              {account.acctNumber})
             </div>
             <OnlyCSVMsgDiv>
               <i>Only CSV files are accepted.</i>

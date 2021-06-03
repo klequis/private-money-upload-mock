@@ -1,29 +1,36 @@
-import { UploadFiles } from './UploadFiles'
-import styled from 'styled-components'
-import { Panel, PanelList, PanelListItem } from 'components'
-
-const AppDiv = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
-  padding-top: 20px;
-`
-
-const Tmp = styled.div`
-  display: flex;
-`
+import { useState } from 'react'
+import { Grid } from 'components/Grid'
+import { accounts } from './accounts'
+import { AccountDropzone } from 'AccountDropzone'
+import { upload } from './upload'
+import * as R from 'ramda'
 
 export const App = () => {
+  const [_fileList, _setFileList] = useState([])
+  const _acceptedLength = _fileList.length
+  const _addFiles = (file) => {
+    _setFileList(R.concat(file, _fileList))
+  }
+  const _uploadClick = async () => {
+    if (_acceptedLength > 0) {
+      const files = _fileList.filter((f) => f.accepted)
+      const r = await upload(files)
+    }
+  }
+  console.log('_fileList', _fileList)
   return (
-    <AppDiv>
-      {/* <PanelList>
-        <PanelListItem>Item One</PanelListItem>
-        <PanelListItem>Item Two</PanelListItem>
-        <PanelListItem>Item Three</PanelListItem>
-      </PanelList> */}
-      {/* <Panel /> */}
-
-      <UploadFiles />
-    </AppDiv>
+    <Grid>
+      <button onClick={_uploadClick}>Upload</button>
+      {accounts.map((a) => (
+        <AccountDropzone
+          key={a.acctId}
+          account={a}
+          files={_fileList}
+          addFiles={_addFiles}
+        />
+      ))}
+    </Grid>
   )
 }
+
+export default App

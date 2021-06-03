@@ -80,8 +80,7 @@ export const UploadFiles = () => {
     getFilesFromEvent: (event) => customFileGetter(event)
   })
 
-  // console.log('_files', _files)
-
+  console.log('_files', _files)
   return (
     <UploadFilesDiv id="UploadFilesDiv">
       <AccountsDiv>
@@ -143,6 +142,6 @@ async function customFileGetter(event) {
   const fileList = event.dataTransfer
     ? event.dataTransfer.files
     : event.target.files
-  console.log('fileList', fileList)
+  // console.log('fileList', fileList)
   return R.map(updateAcceptProp, fileList)
 }
