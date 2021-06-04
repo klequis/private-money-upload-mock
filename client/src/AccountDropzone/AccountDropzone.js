@@ -17,6 +17,20 @@ const filterFiles = (files, acctId) => {
   }, [])
 }
 
+const _wasUploaded = (fileName, files) => {
+  console.group('_wasUploaded')
+  console.log('fileName', fileName)
+  const acceptedFiles = R.filter((x) => x.accepted, files)
+  const names = R.map((x) => x.name, acceptedFiles)
+
+  console.log('names', names)
+  const found = R.any((x) => x === fileName)(names)
+  console.log('found', found)
+
+  console.groupEnd()
+  return found
+}
+
 export const AccountDropzone = ({ account, files = [], addFiles }) => {
   const _onDrop = (acceptedFiles) => {
     console.log('_onDrop: acceptedFiles', acceptedFiles)
@@ -38,11 +52,24 @@ export const AccountDropzone = ({ account, files = [], addFiles }) => {
           account={account}
         />
         <Files>
-          {filterFiles(files, account.acctId).map((file) => (
-            <File key={file.duplicate ? nanoid() : file.name} file={file} />
-          ))}
+          {filterFiles(files, account.acctId).map((file) => {
+            {
+              /* const uploaded = _wasUploaded(file.name, files)
+            console.log('uploaded1', uploaded) */
+            }
+            return (
+              <File
+                key={file.duplicate ? nanoid() : file.name}
+                file={file}
+                uploaded="hi"
+              />
+            )
+          })}
         </Files>
       </CardBody>
     </Card>
   )
 }
+
+// R.hasIn
+//

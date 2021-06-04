@@ -26,9 +26,10 @@ const FileNameExtension = styled.span`
   padding: 0 0 1px 0;
 `
 
-const FileAccepted = ({ file }) => {
+const FileAccepted = ({ file, uploaded }) => {
   const { name, extension } = file
   const baseFileName = getFileBaseName(name)
+  console.log('uploaded2', uploaded)
   return (
     <FileContainerDiv id="Container">
       <FileName id="FileName">
@@ -38,6 +39,7 @@ const FileAccepted = ({ file }) => {
           .{extension}
         </FileNameExtension>
       </FileName>
+      {file.wasUploaded ? ' - yes' : ' - no'}
     </FileContainerDiv>
   )
 }
@@ -70,6 +72,7 @@ const FileRejected = ({ file }) => {
           <FileNameExtension id="FileNameExtension">
             .{extension}
           </FileNameExtension>
+          {file.wasUploaded ? ' - yes' : ' - no'}
         </FileName>
       </FileContainerDiv>
       <RejectMsgSpan>

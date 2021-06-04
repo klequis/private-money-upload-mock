@@ -1,3 +1,3 @@
-import styled from "styled-components";
+import styled from 'styled-components'
 
-export const Files = styled.div``;
+export const Files = styled.div``
