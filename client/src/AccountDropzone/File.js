@@ -3,9 +3,29 @@ import styled from 'styled-components'
 import { RedX } from './RedX'
 import { GreenCheck } from './GreenCheck'
 import { getFileBaseName } from 'lib/getFileBaseName'
+import { Circle } from './Circle'
+import { FileEarmarkText } from './FileEarmarkText'
+
+const Row = styled.div`
+  display: flex;
+  ${'' /* align-items: center; */}
+  ${'' /* justify-content: space-between; */}
+  flex-direction: column;
+  align-items: stretch;
+  border-top: 1px solid white;
+
+  /* border-bottom needs to be last child */
+
+  border-bottom: 1px solid white;
+  padding: 5px 0;
+`
 
 const FileContainerDiv = styled.div`
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5px;
+  width: 100%;
 `
 
 const FileName = styled.div`
@@ -29,24 +49,28 @@ const FileNameExtension = styled.span`
 const FileAccepted = ({ file, uploaded }) => {
   const { name, extension } = file
   const baseFileName = getFileBaseName(name)
-  console.log('uploaded2', uploaded)
   return (
-    <FileContainerDiv id="Container">
-      <FileName id="FileName">
-        <GreenCheck />
-        <FileNameBase id="FileNameBase">{baseFileName}</FileNameBase>
-        <FileNameExtension id="FileNameExtension">
-          .{extension}
-        </FileNameExtension>
-      </FileName>
-      {file.wasUploaded ? ' - yes' : ' - no'}
-    </FileContainerDiv>
+    <Row>
+      <FileContainerDiv id="Container">
+        <FileName id="FileName">
+          {/* <GreenCheck /> */}
+          <FileEarmarkText />
+          <FileNameBase id="FileNameBase">{baseFileName}</FileNameBase>
+          <FileNameExtension id="FileNameExtension">
+            .{extension}
+          </FileNameExtension>
+        </FileName>
+        <Circle />
+        {/* {file.wasUploaded ? ' - yes' : ' - no'} */}
+      </FileContainerDiv>
+    </Row>
   )
 }
 
 const RejectMsgSpan = styled.span`
   padding-left: 21px;
   color: red;
+  padding: 0 5px;
 `
 
 const RejectMessage = ({ file }) => {
@@ -64,7 +88,7 @@ const FileRejected = ({ file }) => {
   const { name, extension } = file
   const baseFileName = getFileBaseName(name)
   return (
-    <div>
+    <Row>
       <FileContainerDiv id="Container">
         <FileName id="FileName">
           <RedX />
@@ -72,13 +96,14 @@ const FileRejected = ({ file }) => {
           <FileNameExtension id="FileNameExtension">
             .{extension}
           </FileNameExtension>
-          {file.wasUploaded ? ' - yes' : ' - no'}
         </FileName>
       </FileContainerDiv>
       <RejectMsgSpan>
-        <RejectMessage file={file} />
+        <em>
+          <RejectMessage file={file} />
+        </em>
       </RejectMsgSpan>
-    </div>
+    </Row>
   )
 }
 

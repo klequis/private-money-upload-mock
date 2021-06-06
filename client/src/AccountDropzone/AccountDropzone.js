@@ -4,36 +4,45 @@ import { customFileGetter } from './customFileGetter'
 import * as R from 'ramda'
 import { Card } from 'components/Card'
 import { CardBody } from 'components/CardBody'
-import { Files } from './Files'
+import { Files as FilesContainer } from './Files'
 import { File } from './File'
 import { nanoid } from 'nanoid'
 
-const filterFiles = (files, acctId) => {
-  return files.reduce((result, file) => {
-    if (file.acctId === acctId) {
-      return R.append(file, result)
-    }
-    return result
-  }, [])
-}
+/*
+    @param {Array} of File objects
+    @description: sorts array of File objects by File.accepted custom property
+ */
+const filesSort = R.sortWith([R.descend(R.prop('accepted'))])
 
-const _wasUploaded = (fileName, files) => {
-  console.group('_wasUploaded')
-  console.log('fileName', fileName)
-  const acceptedFiles = R.filter((x) => x.accepted, files)
-  const names = R.map((x) => x.name, acceptedFiles)
+/*
+    @param {string} acctId: account ID for this AccountDropzone
+    @param {Array} files: of File objects. All files for all accounts
+    @description: filters array of File objects by File.accepted: bool
+*/
+const filesFilter = (acctId) => (files) =>
+  R.filter((f) => f.acctId === acctId)(files)
 
-  console.log('names', names)
-  const found = R.any((x) => x === fileName)(names)
-  console.log('found', found)
-
-  console.groupEnd()
-  return found
+/*
+    @param {string} acctId: account ID for this AccountDropzone
+    @param {Array} files: of File objects. All files for all accounts
+    @description: returns array of filtered & sorted <File /> components
+*/
+const Files = ({ acctId, files }) => {
+  return R.pipe(
+    filesFilter(acctId),
+    filesSort,
+    R.map((file) => (
+      <File
+        key={file.duplicate ? nanoid() : file.name}
+        file={file}
+        uploaded="hi"
+      />
+    ))
+  )(files)
 }
 
 export const AccountDropzone = ({ account, files = [], addFiles }) => {
   const _onDrop = (acceptedFiles) => {
-    console.log('_onDrop: acceptedFiles', acceptedFiles)
     addFiles(acceptedFiles) // `addFiles` does a concat
   }
 
@@ -51,25 +60,10 @@ export const AccountDropzone = ({ account, files = [], addFiles }) => {
           getInputProps={getInputProps}
           account={account}
         />
-        <Files>
-          {filterFiles(files, account.acctId).map((file) => {
-            {
-              /* const uploaded = _wasUploaded(file.name, files)
-            console.log('uploaded1', uploaded) */
-            }
-            return (
-              <File
-                key={file.duplicate ? nanoid() : file.name}
-                file={file}
-                uploaded="hi"
-              />
-            )
-          })}
-        </Files>
+        <FilesContainer>
+          <Files files={files} acctId={account.acctId} />
+        </FilesContainer>
       </CardBody>
     </Card>
   )
 }
-
-// R.hasIn
-//
