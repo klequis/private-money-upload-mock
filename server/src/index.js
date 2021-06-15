@@ -1,13 +1,11 @@
 import cors from 'cors'
 import formidable from '../formidable/src'
 import path from 'path'
-import { wrapAsync } from './wrapAsync'
 
 const port = 3030
 
 const app = require('express')()
 app.use(cors())
-console.log('formidable', formidable)
 
 /* From example
 app.post('/api/upload', function (req, res) {
