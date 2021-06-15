@@ -1,23 +1,25 @@
 module.exports = {
-  extends: ["react-app", "plugin:jsdoc/recommended"],
+  extends: ['react-app', 'plugin:jsdoc/recommended'],
   env: {
-    mocha: true,
+    mocha: true
   },
-  plugins: ["react-hooks", "jsdoc"],
+  plugins: ['react-hooks', 'jsdoc'],
   rules: {
-    "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn",
-    semi: ["warn", "never"],
-    quotes: ["warn", "single"],
-    "space-before-function-paren": [
-      "error",
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
+    semi: ['warn', 'never'],
+    quotes: ['warn', 'single'],
+    'space-before-function-paren': [
+      'error',
       {
-        anonymous: "never",
-        named: "never",
-        asyncArrow: "always",
-      },
-    ],
-    "jsdoc/require-jsdoc": 1,
+        anonymous: 'never',
+        named: 'never',
+        asyncArrow: 'always'
+      }
+    ]
   },
-  parser: "babel-eslint",
-};
+  parser: 'babel-eslint',
+  rules: {
+    'jsdoc/require-jsdoc': 1
+  }
+}

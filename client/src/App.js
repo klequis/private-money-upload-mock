@@ -1,29 +1,58 @@
-import { UploadFiles } from './UploadFiles'
-import styled from 'styled-components'
-import { Panel, PanelList, PanelListItem } from 'components'
+import { useState } from 'react'
+import { Grid } from 'components/Grid'
+import { accounts } from './accounts'
+import { AccountDropzone } from 'AccountDropzone'
+import { upload } from './upload'
+import * as R from 'ramda'
 
-const AppDiv = styled.div`
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
-  padding-top: 20px;
-`
-
-const Tmp = styled.div`
-  display: flex;
-`
+const setWasUploaded = (file, names) => {
+  const { name } = file
+  const a = R.any((n) => n === name)(names)
+  file.wasUploaded = a
+  return file
+}
 
 export const App = () => {
-  return (
-    <AppDiv>
-      {/* <PanelList>
-        <PanelListItem>Item One</PanelListItem>
-        <PanelListItem>Item Two</PanelListItem>
-        <PanelListItem>Item Three</PanelListItem>
-      </PanelList> */}
-      {/* <Panel /> */}
+  const [_fileList, _setFileList] = useState([])
 
-      <UploadFiles />
-    </AppDiv>
+  const _addFiles = (file) => {
+    _setFileList(R.concat(file, _fileList))
+  }
+
+  const _acceptedLength = _fileList.length
+
+  const _uploadClick = async () => {
+    if (_acceptedLength > 0) {
+      // get [] of all files where accepted === true, i.e., not rejected based on file extension
+      const allAcceptedFiles = _fileList.filter((f) => f.accepted)
+      // returns [] of only the files the server accepted. It checks mimetype.
+      const uploadedFiles = await upload(allAcceptedFiles)
+      // The returned object for each uploaded file has .originalFilename, not .name as a File object does.
+      const uploadedFileNames = R.map((x) => x.originalFilename, uploadedFiles)
+      const newFileList = R.map(
+        (f) => setWasUploaded(f, uploadedFileNames),
+        _fileList
+      )
+      _setFileList(newFileList)
+    }
+  }
+  console.log('_fileList', _fileList)
+  // console.log('_uploadedFiles', _uploadedFiles)
+  return (
+    <div>
+      <button onClick={_uploadClick}>Upload</button>
+      <Grid>
+        {accounts.map((a) => (
+          <AccountDropzone
+            key={a.acctId}
+            account={a}
+            files={_fileList}
+            addFiles={_addFiles}
+          />
+        ))}
+      </Grid>
+    </div>
   )
 }
+
+export default App

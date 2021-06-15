@@ -1,13 +1,11 @@
-/node_modules
-/.pnp
-.pnp.js
-/coverage
-/build
 dist
+
+/coverage
 logs
 log
 *.log
 app.log.*
+npm-debug.log*
 pids
 *.pid
 *.seed
@@ -16,7 +14,11 @@ lib-cov
 .npm
 .node_repl_history
 .nyc_output
+
 tmp.js
+/.pnp
+.pnp.js
+/build
 .DS_Store
 .env.local
 .env.development.local
@@ -25,6 +27,7 @@ tmp.js
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
 */node_modules
 node_modules
 config.settings.js
@@ -32,8 +35,4 @@ config.secret.js
 *.csv
 *.csv#
 */secrets
-secrets
-
-
-client/*
-
+/server/data

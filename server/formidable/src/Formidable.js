@@ -4,7 +4,6 @@
 'use strict';
 
 const os = require('os');
-const fs = require('fs');
 const path = require('path');
 const hexoid = require('hexoid');
 const once = require('once');
@@ -22,11 +21,15 @@ const DEFAULT_OPTIONS = {
   allowEmptyFiles: true,
   keepExtensions: false,
   encoding: 'utf-8',
-  hash: false,
+  hashAlgorithm: false,
   uploadDir: os.tmpdir(),
   multiples: false,
   enabledPlugins: ['octetstream', 'querystring', 'multipart', 'json'],
   fileWriteStreamHandler: null,
+  defaultInvalidName: 'invalid-name',
+  filter: function () {
+    return true;
+  },
 };
 
 const PersistentFile = require('./PersistentFile');
@@ -46,9 +49,11 @@ class IncomingForm extends EventEmitter {
     super();
 
     this.options = { ...DEFAULT_OPTIONS, ...options };
-    console.log('options', options);
-    const dir = this.options.uploadDir || this.options.uploaddir || os.tmpdir();
-    console.log('dir', dir);
+
+    const dir = path.resolve(
+      this.options.uploadDir || this.options.uploaddir || os.tmpdir(),
+    );
+
     this.uploaddir = dir;
     this.uploadDir = dir;
 
@@ -82,6 +87,7 @@ class IncomingForm extends EventEmitter {
         errors.missingPlugin,
       );
     }
+
     this.options.enabledPlugins.forEach((pluginName) => {
       const plgName = pluginName.toLowerCase();
       // eslint-disable-next-line import/no-dynamic-require, global-require
@@ -89,10 +95,6 @@ class IncomingForm extends EventEmitter {
     });
 
     this._setUpMaxFields();
-    // console.log('this.options', this.options);
-    // console.log('this.uploadDir', this.uploadDir);
-    // console.log('this.uploaddir', this.uploaddir);
-    // console.log('this.uploaddir', this._uploadPath());
   }
 
   use(plugin) {
@@ -270,17 +272,17 @@ class IncomingForm extends EventEmitter {
   }
 
   _handlePart(part) {
-    if (part.filename && typeof part.filename !== 'string') {
+    if (part.originalFilename && typeof part.originalFilename !== 'string') {
       this._error(
         new FormidableError(
-          `the part.filename should be string when it exists`,
+          `the part.originalFilename should be string when it exists`,
           errors.filenameNotString,
         ),
       );
       return;
     }
 
-    // This MUST check exactly for undefined. You can not change it to !part.filename.
+    // This MUST check exactly for undefined. You can not change it to !part.originalFilename.
 
     // todo: uncomment when switch tests to Jest
     // console.log(part);
@@ -288,9 +290,9 @@ class IncomingForm extends EventEmitter {
     // ? NOTE(@tunnckocore): no it can be any falsey value, it most probably depends on what's returned
     // from somewhere else. Where recently I changed the return statements
     // and such thing because code style
-    // ? NOTE(@tunnckocore): or even better, if there is no mime, then it's for sure a field
-    // ? NOTE(@tunnckocore): filename is an empty string when a field?
-    if (!part.mime) {
+    // ? NOTE(@tunnckocore): or even better, if there is no mimetype, then it's for sure a field
+    // ? NOTE(@tunnckocore): originalFilename is an empty string when a field?
+    if (!part.mimetype) {
       let value = '';
       const decoder = new StringDecoder(
         part.transferEncoding || this.options.encoding,
@@ -317,12 +319,19 @@ class IncomingForm extends EventEmitter {
       return;
     }
 
+    if (!this.options.filter(part)) {
+      return;
+    }
+
     this._flushing += 1;
 
+    const newFilename = this._getNewName(part);
+    const filepath = this._joinDirectoryName(newFilename);
     const file = this._newFile({
-      path: this._rename(part),
-      filename: part.filename,
-      mime: part.mime,
+      newFilename,
+      filepath,
+      originalFilename: part.originalFilename,
+      mimetype: part.mimetype,
     });
     file.on('error', (err) => {
       this._error(err);
@@ -458,7 +467,6 @@ class IncomingForm extends EventEmitter {
     if (Array.isArray(this.openedFiles)) {
       this.openedFiles.forEach((file) => {
         file.destroy();
-        setTimeout(fs.unlink, 0, file.path, () => {});
       });
     }
   }
@@ -480,19 +488,22 @@ class IncomingForm extends EventEmitter {
     return new MultipartParser(this.options);
   }
 
-  _newFile({ path: filePath, filename: name, mime: type }) {
+  _newFile({ filepath, originalFilename, mimetype, newFilename }) {
     return this.options.fileWriteStreamHandler
       ? new VolatileFile({
-          name,
-          type,
+          newFilename,
+          filepath,
+          originalFilename,
+          mimetype,
           createFileWriteStream: this.options.fileWriteStreamHandler,
-          hash: this.options.hash,
+          hashAlgorithm: this.options.hashAlgorithm,
         })
       : new PersistentFile({
-          path: filePath,
-          name,
-          type,
-          hash: this.options.hash,
+          newFilename,
+          filepath,
+          originalFilename,
+          mimetype,
+          hashAlgorithm: this.options.hashAlgorithm,
         });
   }
 
@@ -504,13 +515,13 @@ class IncomingForm extends EventEmitter {
     if (!m) return null;
 
     const match = m[2] || m[3] || '';
-    let filename = match.substr(match.lastIndexOf('\\') + 1);
-    filename = filename.replace(/%22/g, '"');
-    filename = filename.replace(/&#([\d]{4});/g, (_, code) =>
+    let originalFilename = match.substr(match.lastIndexOf('\\') + 1);
+    originalFilename = originalFilename.replace(/%22/g, '"');
+    originalFilename = originalFilename.replace(/&#([\d]{4});/g, (_, code) =>
       String.fromCharCode(code),
     );
 
-    return filename;
+    return originalFilename;
   }
 
   _getExtension(str) {
@@ -530,31 +541,45 @@ class IncomingForm extends EventEmitter {
     return basename.slice(firstDot, lastDot) + extname;
   }
 
-  _uploadPath(part, fp) {
-    console.log('_uploadPath: part', part);
-    console.log('_uploadPath: fp', fp);
-    const name = fp || `${this.uploadDir}${path.sep}${toHexoId()}`;
 
-    if (part && this.options.keepExtensions) {
-      const filename = typeof part === 'string' ? part : part.filename;
-      console.log('_uploadPath: filename', filename);
-      return `${name}${this._getExtension(filename)}`;
+
+  _joinDirectoryName(name) {
+    const newPath = path.join(this.uploadDir, name);
+
+    // prevent directory traversal attacks
+    if (!newPath.startsWith(this.uploadDir)) {
+      return path.join(this.uploadDir, this.options.defaultInvalidName);
     }
-    console.log('_uploadPath: name', name);
-    return name;
+
+    return newPath;
   }
 
   _setUpRename() {
     const hasRename = typeof this.options.filename === 'function';
-
-    if (this.options.keepExtensions === true && hasRename) {
-      this._rename = (part) => {
-        const resultFilepath = this.options.filename.call(this, part, this);
-
-        return this._uploadPath(part, resultFilepath);
+    if (hasRename) {
+      this._getNewName = (part) => {
+        let ext = '';
+        let name = this.options.defaultInvalidName;
+        if (part.originalFilename) {
+          // can be null
+          ({ ext, name } = path.parse(part.originalFilename));
+          if (this.options.keepExtensions !== true) {
+            ext = '';
+          }
+        }
+        return this.options.filename.call(this, name, ext, part, this);
       };
     } else {
-      this._rename = (part) => this._uploadPath(part);
+      this._getNewName = (part) => {
+        const name = toHexoId();
+
+        if (part && this.options.keepExtensions) {
+          const originalFilename = typeof part === 'string' ? part : part.originalFilename;
+          return `${name}${this._getExtension(originalFilename)}`;
+        }
+    
+        return name;
+      }
     }
   }
 
