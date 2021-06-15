@@ -27,7 +27,7 @@ export const App = () => {
       const allAcceptedFiles = _fileList.filter((f) => f.accepted)
       // returns [] of only the files the server accepted. It checks mimetype.
       const uploadedFiles = await upload(allAcceptedFiles)
-      console.log('uploadedFiles', uploadedFiles)
+      // console.log('uploadedFiles', uploadedFiles)
       // The returned object for each uploaded file has .originalFilename, not .name as a File object does.
       const uploadedFileNames = R.map((x) => x.originalFilename, uploadedFiles)
       const newFileList = R.map(
@@ -37,7 +37,7 @@ export const App = () => {
       _setFileList(newFileList)
     }
   }
-  console.log('_fileList', _fileList)
+  // console.log('_fileList', _fileList)
 
   // console.log('_uploadedFiles', _uploadedFiles)
   return (

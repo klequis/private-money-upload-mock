@@ -1,11 +1,51 @@
 import cors from 'cors'
 import formidable from '../formidable/src'
 import path from 'path'
+import * as R from 'ramda'
+import { logRequest, yellow, green, blue } from './logger'
 
 const port = 3030
 
 const app = require('express')()
 app.use(cors())
+
+/* original */
+app.post('/api/upload', function (req, res) {
+  const uploadDir = path.join(__dirname, '../uploads')
+  const form = formidable({
+    filter: function ({ name, originalFilename, mimetype }) {
+      return mimetype && mimetype.includes('text/csv')
+    },
+    multiples: true,
+    uploadDir: uploadDir // - doesn't work :(
+  })
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      next(err)
+      return
+    }
+    // console.log('fields', fields)
+    // console.log('files', files)
+    // console.log('files[0]', files.uploadedFiles[0])
+
+    files.uploadedFiles.map((f) => {
+      const a = {
+        lastModifiedDate: f.lastModifiedDate,
+        filePath: f.filepath,
+        newFilename: f.newFilename,
+        originalFilename: f.originalFilename,
+        acctId: fields[f.originalFilename][1]
+      }
+      console.log('a', a)
+    })
+
+    res.json({ fields, files, uploadDir })
+  })
+  form.on('error', function (error) {
+    console.log('err', err)
+  })
+})
 
 /* From example
 app.post('/api/upload', function (req, res) {
@@ -33,35 +73,6 @@ app.post('/api/upload', function (req, res) {
   return
 })
 */
-
-/* original */
-app.post('/api/upload', function (req, res) {
-  const uploadDir = path.join(__dirname, '../uploads')
-  const form = formidable({
-    filter: function ({ name, originalFilename, mimetype }) {
-      // keep only images
-      // return mimetype && mimetype.includes('image')
-      return mimetype && mimetype.includes('text/csv')
-      // return false
-    },
-    multiples: true,
-    uploadDir: uploadDir // - doesn't work :(
-  })
-
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      next(err)
-      return
-    }
-    // console.log('fields', fields)
-    console.log('files', files)
-
-    res.json({ fields, files, uploadDir })
-  })
-  form.on('error', function (error) {
-    console.log('err', err)
-  })
-})
 
 /*
     Add for testing with Formidable example
