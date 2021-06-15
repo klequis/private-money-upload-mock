@@ -11,6 +11,8 @@ export const upload = async (files) => {
     formData.append('uploadedFiles', f)
   })
 
+  console.log('formData', formData)
+
   const r = await fetch('http://localhost:3030/api/upload', {
     method: 'POST',
     body: formData
