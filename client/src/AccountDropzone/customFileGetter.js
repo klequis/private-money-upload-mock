@@ -13,8 +13,8 @@ const isDuplicate = (fileName, currentFileNames) =>
  * @returns {Array} array of accepted files
  */
 export async function customFileGetter(event, acctId, currentFiles) {
-  console.log('event', event)
-  console.log('files', currentFiles)
+  // console.log('event', event)
+  // console.log('files', currentFiles)
   const currentFileNames = currentFiles.map((f) => f.name)
 
   const addProps = (file) => {
@@ -26,7 +26,13 @@ export async function customFileGetter(event, acctId, currentFiles) {
     addDefinedProperty('acctId', acctId, file)
     const isDup = isDuplicate(name, currentFileNames)
     addDefinedProperty('duplicate', isDup, file)
-    addDefinedProperty('accepted', isCSVExtension && !isDup, file)
+
+    // TODO: restore original code
+    // addDefinedProperty('accepted', isCSVExtension && !isDup, file)
+    // tmp make accepted true for all
+    addDefinedProperty('accepted', true, file)
+    //
+
     addDefinedProperty('wasUploaded', false, file, true)
     return file
   }

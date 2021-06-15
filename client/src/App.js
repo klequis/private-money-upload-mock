@@ -5,12 +5,7 @@ import { AccountDropzone } from 'AccountDropzone'
 import { upload } from './upload'
 import * as R from 'ramda'
 
-// const _addWasUploadedProp = (allFiles, uploadedFiles) => {
-//   const acceptedFiles = R.filter((x) => x.accepted, files)
-//   const names = R.map((x) => x.name, acceptedFiles)
-// }
-
-const p = (file, names) => {
+const setWasUploaded = (file, names) => {
   const { name } = file
   const a = R.any((n) => n === name)(names)
   file.wasUploaded = a
@@ -19,7 +14,6 @@ const p = (file, names) => {
 
 export const App = () => {
   const [_fileList, _setFileList] = useState([])
-  // const [_uploadedFiles, _setUploadedFiles] = useState([])
 
   const _addFiles = (file) => {
     _setFileList(R.concat(file, _fileList))
@@ -29,14 +23,17 @@ export const App = () => {
 
   const _uploadClick = async () => {
     if (_acceptedLength > 0) {
-      const files = _fileList.filter((f) => f.accepted)
-      const r = await upload(files)
-      const acceptedFiles = R.filter((x) => x.accepted, files)
-      const names = R.map((x) => x.name, acceptedFiles)
-      const d = R.map((f) => p(f, names), _fileList)
-      console.log('d', d)
-
-      // _setUploadedFiles(a)
+      // get [] of all files where accepted === true, i.e., not rejected based on file extension
+      const allAcceptedFiles = _fileList.filter((f) => f.accepted)
+      // returns [] of only the files the server accepted. It checks mimetype.
+      const uploadedFiles = await upload(allAcceptedFiles)
+      // The returned object for each uploaded file has .originalFilename, not .name as a File object does.
+      const uploadedFileNames = R.map((x) => x.originalFilename, uploadedFiles)
+      const newFileList = R.map(
+        (f) => setWasUploaded(f, uploadedFileNames),
+        _fileList
+      )
+      _setFileList(newFileList)
     }
   }
   console.log('_fileList', _fileList)
@@ -51,7 +48,6 @@ export const App = () => {
             account={a}
             files={_fileList}
             addFiles={_addFiles}
-            // uploadedFiles={_uploadedFiles}
           />
         ))}
       </Grid>

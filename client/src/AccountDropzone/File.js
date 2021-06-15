@@ -1,9 +1,9 @@
 import styled from 'styled-components'
 // import { CheckSquareFill, XSquareFill } from 'react-bootstrap-icons'
-import { RedX } from './RedX'
-import { GreenCheck } from './GreenCheck'
 import { getFileBaseName } from 'lib/getFileBaseName'
 import { Circle } from './Circle'
+import { CircleCheck } from './CircleCheck'
+import { CircleX } from './CircleX'
 import { FileEarmarkText } from './FileEarmarkText'
 
 const Row = styled.div`
@@ -91,12 +91,12 @@ const FileRejected = ({ file }) => {
     <Row>
       <FileContainerDiv id="Container">
         <FileName id="FileName">
-          <RedX />
           <FileNameBase id="FileNameBase">{baseFileName}</FileNameBase>
           <FileNameExtension id="FileNameExtension">
             .{extension}
           </FileNameExtension>
         </FileName>
+        <CircleX />
       </FileContainerDiv>
       <RejectMsgSpan>
         <em>
