@@ -40,6 +40,7 @@ app.post('/api/upload', async function (req, res) {
     }
   })
   res.json(r.map((f) => f.originalFilename))
+
   form.on('error', function (error) {
     console.log('err', err)
   })
