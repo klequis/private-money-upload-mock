@@ -26,9 +26,9 @@ export const upload = async (files) => {
   //   console.log(pair[0] + ', ' + pair[1])
   // } // logs out "uploadedFiles, [object File]" 8 times
 
-  for (var key of formData.keys()) {
-    console.log(key)
-  } // logs "uploadedFiles" 8 times
+  // for (var key of formData.keys()) {
+  //   console.log(key)
+  // } // logs "uploadedFiles" 8 times
 
   const r = await fetch('http://localhost:3030/api/upload', {
     method: 'POST',
@@ -36,5 +36,6 @@ export const upload = async (files) => {
   })
 
   const j = await r.json()
-  return j.files.uploadedFiles
+  console.log('j', j)
+  return j
 }

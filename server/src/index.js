@@ -10,7 +10,7 @@ const app = require('express')()
 app.use(cors())
 
 /* original */
-app.post('/api/upload', function (req, res) {
+app.post('/api/upload', async function (req, res) {
   const uploadDir = path.join(__dirname, '../uploads')
   const form = formidable({
     filter: function ({ name, originalFilename, mimetype }) {
@@ -20,28 +20,26 @@ app.post('/api/upload', function (req, res) {
     uploadDir: uploadDir // - doesn't work :(
   })
 
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      next(err)
-      return
-    }
-    // console.log('fields', fields)
-    // console.log('files', files)
-    // console.log('files[0]', files.uploadedFiles[0])
-
-    files.uploadedFiles.map((f) => {
-      const a = {
-        lastModifiedDate: f.lastModifiedDate,
-        filePath: f.filepath,
-        newFilename: f.newFilename,
-        originalFilename: f.originalFilename,
-        acctId: fields[f.originalFilename][1]
+  const a = await new Promise((resolve, reject) => {
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        reject(err)
+        return
       }
-      console.log('a', a)
+      resolve({ fields, files, uploadDir })
     })
-
-    res.json({ fields, files, uploadDir })
   })
+  const { fields, files } = a
+  const r = files.uploadedFiles.map((f) => {
+    return {
+      lastModifiedDate: f.lastModifiedDate,
+      filePath: f.filepath,
+      newFilename: f.newFilename,
+      originalFilename: f.originalFilename,
+      acctId: fields[f.originalFilename][1]
+    }
+  })
+  res.json(r.map((f) => f.originalFilename))
   form.on('error', function (error) {
     console.log('err', err)
   })
