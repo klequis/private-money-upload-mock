@@ -5,15 +5,15 @@ const onProgress = ({ percent }, file) => {
 }
 
 const onSuccess = (res, file) => {
-  console.log('onSuccess', res, file.name)
+  console.log('onSuccess', res /*, file.name*/)
 }
 const onError = (e) => {
   console.log('ERROR', e)
 }
 
-export const upload = (files) => {
+export const xx_upload = (files) => {
   files.forEach((f) => {
-    uploadNew(f)
+    // uploadNew(f)
   })
 }
 
@@ -41,26 +41,29 @@ const uploadNew = (file) => {
 }
 */
 
-const uploadNew = (file) => {
-  const formData = new FormData()
-  formData.append('uploadedFiles', file)
-  formData.append(file.name, file.name)
-  formData.append(file.name, file.acctId)
-
-  const options = {
-    // withCredentials,
-    // headers,
-    onUploadProgress: ({ total, loaded }) => {
-      onProgress(
-        { percent: Math.round((loaded / total) * 100).toFixed(2) },
-        file
-      )
-    }
-  }
+export const upload = (files) => {
   axios
-    .post('http://localhost:3030/api/upload', formData, options)
-    .then(({ data: response }) => {
-      onSuccess(response, file)
+    .all(
+      files.map((f) => {
+        const options = {
+          // withCredentials,
+          // headers,
+          onUploadProgress: ({ total, loaded }) => {
+            onProgress(
+              { percent: Math.round((loaded / total) * 100).toFixed(2) },
+              f
+            )
+          }
+        }
+        const formData = new FormData()
+        formData.append('uploadedFiles', f)
+        formData.append(f.name, f.name)
+        formData.append(f.name, f.acctId)
+        return axios.post('http://localhost:3030/api/upload', formData, options)
+      })
+    )
+    .then((x) => {
+      onSuccess(x)
     })
     .catch(onError)
 }
