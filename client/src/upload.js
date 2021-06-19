@@ -11,32 +11,62 @@ const onError = (e) => {
   console.log('ERROR', e)
 }
 
-export const upload = (files) => {
-  axios
-    .all(
-      files.map((f) => {
-        const options = {
-          // withCredentials,
-          // headers,
-          onUploadProgress: ({ total, loaded }) => {
-            onProgress(
-              { percent: Math.round((loaded / total) * 100).toFixed(2) },
-              f
-            )
-          }
+/* using async */
+export const upload = async (files) => {
+  const a = await axios.all(
+    files.map((f) => {
+      const options = {
+        // withCredentials,
+        // headers,
+        onUploadProgress: ({ total, loaded }) => {
+          onProgress(
+            { percent: Math.round((loaded / total) * 100).toFixed(2) },
+            f
+          )
         }
-        const formData = new FormData()
-        formData.append('uploadedFiles', f)
-        formData.append(f.name, f.name)
-        formData.append(f.name, f.acctId)
-        return axios.post('http://localhost:3030/api/upload', formData, options)
-      })
-    )
-    .then((x) => {
-      onSuccess(x)
+      }
+      const formData = new FormData()
+      formData.append('uploadedFiles', f)
+      formData.append(f.name, f.name)
+      formData.append(f.name, f.acctId)
+      return axios.post('http://localhost:3030/api/upload', formData, options)
     })
-    .catch(onError)
+  )
+  console.log('a', a)
+  return a.map((x) => x.data.result)
+  // .then((x) => {
+  //   onSuccess(x)
+  // })
+  // .catch(onError)
 }
+
+/* using then */
+// export const upload = (files) => {
+//   axios
+//     .all(
+//       files.map((f) => {
+//         const options = {
+//           // withCredentials,
+//           // headers,
+//           onUploadProgress: ({ total, loaded }) => {
+//             onProgress(
+//               { percent: Math.round((loaded / total) * 100).toFixed(2) },
+//               f
+//             )
+//           }
+//         }
+//         const formData = new FormData()
+//         formData.append('uploadedFiles', f)
+//         formData.append(f.name, f.name)
+//         formData.append(f.name, f.acctId)
+//         return axios.post('http://localhost:3030/api/upload', formData, options)
+//       })
+//     )
+//     .then((x) => {
+//       onSuccess(x)
+//     })
+//     .catch(onError)
+// }
 
 /**
  *

@@ -31,7 +31,7 @@ export const App = () => {
       // The returned object for each uploaded file has .originalFilename, not .name as a File object does.
       // const uploadedFileNames = R.map((x) => x.originalFilename, uploadedFiles)
       console.log('uploadedFileNames', uploadedFileNames)
-      return
+
       const newFileList = R.map(
         (f) => setWasUploaded(f, uploadedFileNames),
         _fileList
