@@ -1,8 +1,68 @@
-const getFileMeta = (f) => {
-  return {
-    name: f.name,
-    acctId: f.acctId
+import axios from 'axios'
+
+const onProgress = ({ percent }, file) => {
+  console.log('onProgress', `${percent}%`, file.name)
+}
+
+const onSuccess = (res, file) => {
+  console.log('onSuccess', res, file.name)
+}
+const onError = (e) => {
+  console.log('ERROR', e)
+}
+
+export const upload = (files) => {
+  files.forEach((f) => {
+    uploadNew(f)
+  })
+}
+
+/*
+const uploadNew = (file) => {
+  const formData = new FormData()
+  formData.append('uploadedFiles', file)
+  formData.append(file.name, file.name)
+  formData.append(file.name, file.acctId)
+  axios
+    .post('http://localhost:3030/api/upload', formData, {
+      // withCredentials,
+      // headers,
+      onUploadProgress: ({ total, loaded }) => {
+        onProgress(
+          { percent: Math.round((loaded / total) * 100).toFixed(2) },
+          file
+        )
+      }
+    })
+    .then(({ data: response }) => {
+      onSuccess(response, file)
+    })
+    .catch(onError)
+}
+*/
+
+const uploadNew = (file) => {
+  const formData = new FormData()
+  formData.append('uploadedFiles', file)
+  formData.append(file.name, file.name)
+  formData.append(file.name, file.acctId)
+
+  const options = {
+    // withCredentials,
+    // headers,
+    onUploadProgress: ({ total, loaded }) => {
+      onProgress(
+        { percent: Math.round((loaded / total) * 100).toFixed(2) },
+        file
+      )
+    }
   }
+  axios
+    .post('http://localhost:3030/api/upload', formData, options)
+    .then(({ data: response }) => {
+      onSuccess(response, file)
+    })
+    .catch(onError)
 }
 
 /**
@@ -11,7 +71,8 @@ const getFileMeta = (f) => {
  * @returns {object} { accepted: [], rejected: [] }
  * @description Takes a single array of File objects and divides them into groups based on File.accept = true || false.
  */
-export const upload = async (files) => {
+/*
+export const upload_prev = async (files) => {
   const formData = new FormData()
 
   files.forEach((f) => {
@@ -39,3 +100,4 @@ export const upload = async (files) => {
   console.log('j', j)
   return j
 }
+*/
