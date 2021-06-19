@@ -30,16 +30,21 @@ app.post('/api/upload', async function (req, res) {
     })
   })
   const { fields, files } = a
-  const r = files.uploadedFiles.map((f) => {
-    return {
-      lastModifiedDate: f.lastModifiedDate,
-      filePath: f.filepath,
-      newFilename: f.newFilename,
-      originalFilename: f.originalFilename,
-      acctId: fields[f.originalFilename][1]
-    }
-  })
-  res.json(r.map((f) => f.originalFilename))
+  console.log('files', files.uploadedFiles.originalFilename)
+
+  res.json({ result: files.uploadedFiles.originalFilename })
+
+  // TODO: Confirm this code is needed or not
+  // const r = files.uploadedFiles.map((f) => {
+  //   return {
+  //     lastModifiedDate: f.lastModifiedDate,
+  //     filePath: f.filepath,
+  //     newFilename: f.newFilename,
+  //     originalFilename: f.originalFilename,
+  //     acctId: fields[f.originalFilename][1]
+  //   }
+  // })
+  // res.json(r.map((f) => f.originalFilename))
 
   form.on('error', function (error) {
     console.log('err', err)
