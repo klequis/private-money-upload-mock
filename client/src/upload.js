@@ -1,8 +1,9 @@
 import axios from 'axios'
+import * as R from 'ramda'
 
-const onProgress = ({ percent }, file) => {
-  console.log('onProgress', `${percent}%`, file.name)
-}
+// const onProgress = ({ percent }, fileName) => {
+//   console.log('onProgress', `${percent}%`, fileName)
+// }
 
 const onSuccess = (res, file) => {
   console.log('onSuccess', res /*, file.name*/)
@@ -12,17 +13,18 @@ const onError = (e) => {
 }
 
 /* using async */
-export const upload = async (files) => {
+export const upload = async (files, progress, setProgress) => {
+  console.log('setProgress', setProgress)
   const a = await axios.all(
     files.map((f) => {
       const options = {
         // withCredentials,
         // headers,
         onUploadProgress: ({ total, loaded }) => {
-          onProgress(
-            { percent: Math.round((loaded / total) * 100).toFixed(2) },
-            f
-          )
+          // setProgress(f.name, Math.round((loaded / total) * 100).toFixed(2))
+          const filename = f.name
+          const progressNum = Math.round((loaded / total) * 100).toFixed(2)
+          setProgress(R.merge(progress, { filename, progressNum }))
         }
       }
       const formData = new FormData()
@@ -34,10 +36,6 @@ export const upload = async (files) => {
   )
   console.log('a', a)
   return a.map((x) => x.data.result)
-  // .then((x) => {
-  //   onSuccess(x)
-  // })
-  // .catch(onError)
 }
 
 /* using then */

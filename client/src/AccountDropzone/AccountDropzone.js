@@ -4,7 +4,7 @@ import { customFileGetter } from './customFileGetter'
 import * as R from 'ramda'
 import { Card } from 'components/Card'
 import { CardBody } from 'components/CardBody'
-import { Files as FilesContainer } from './Files'
+import { FilesDiv } from './FilesDiv'
 import { File } from './File'
 import { nanoid } from 'nanoid'
 
@@ -27,7 +27,7 @@ const filesFilter = (acctId) => (files) =>
     @param {Array} files: of File objects. All files for all accounts
     @description: returns array of filtered & sorted <File /> components
 */
-const Files = ({ acctId, files }) => {
+const Files = ({ acctId, files, progress }) => {
   return R.pipe(
     filesFilter(acctId),
     filesSort,
@@ -35,13 +35,18 @@ const Files = ({ acctId, files }) => {
       <File
         key={file.duplicate ? nanoid() : file.name}
         file={file}
-        uploaded="hi"
+        progress={progress}
       />
     ))
   )(files)
 }
 
-export const AccountDropzone = ({ account, files = [], addFiles }) => {
+export const AccountDropzone = ({
+  account,
+  files = [],
+  addFiles,
+  progress
+}) => {
   const _onDrop = (acceptedFiles) => {
     addFiles(acceptedFiles) // `addFiles` does a concat
   }
@@ -60,9 +65,9 @@ export const AccountDropzone = ({ account, files = [], addFiles }) => {
           getInputProps={getInputProps}
           account={account}
         />
-        <FilesContainer>
-          <Files files={files} acctId={account.acctId} />
-        </FilesContainer>
+        <FilesDiv>
+          <Files files={files} acctId={account.acctId} progress={progress} />
+        </FilesDiv>
       </CardBody>
     </Card>
   )

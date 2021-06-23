@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 // import { CheckSquareFill, XSquareFill } from 'react-bootstrap-icons'
 import { getFileBaseName } from 'lib/getFileBaseName'
@@ -5,6 +6,7 @@ import { Circle } from './Circle'
 import { CircleCheck } from './CircleCheck'
 import { CircleX } from './CircleX'
 import { FileEarmarkText } from './FileEarmarkText'
+import * as R from 'ramda'
 
 const Row = styled.div`
   display: flex;
@@ -46,7 +48,25 @@ const FileNameExtension = styled.span`
   padding: 0 0 1px 0;
 `
 
-const FileAccepted = ({ file, uploaded }) => {
+const Progress = ({ file, progress }) => {
+  const { filename, progressNum } = progress
+  // is there a progress for this file?
+  // const a = progress[filename]
+
+  // If progress is not for this file ignore / return
+  if (file.name !== filename) return 'hi'
+  // console.log('5. File.Progress: progress', progress)
+  // console.log('File.Progress: a', a)
+
+  if (progressNum === 0) return <Circle />
+  if (progressNum === 100) return <CircleCheck />
+  if (progressNum > 0 && progress < 100) return <span>{progress}</span>
+  return <span>E</span>
+}
+
+const FileAccepted = ({ file, progress }) => {
+  // console.log('*** file', file)
+  // console.log('4. File.FileAccepted: progress', progress)
   const { name, extension } = file
   const baseFileName = getFileBaseName(name)
   return (
@@ -60,7 +80,7 @@ const FileAccepted = ({ file, uploaded }) => {
             .{extension}
           </FileNameExtension>
         </FileName>
-        <Circle />
+        <Progress file={file} progress={progress} />
         {/* {file.wasUploaded ? ' - yes' : ' - no'} */}
       </FileContainerDiv>
     </Row>
@@ -107,7 +127,24 @@ const FileRejected = ({ file }) => {
   )
 }
 
-export const File = ({ file }) => {
+export const File = ({ file, progress }) => {
   const { accepted } = file
-  return accepted ? <FileAccepted file={file} /> : <FileRejected file={file} />
+  const [_progress, _setProgress] = useState({})
+  // if (file.name === progress.filename)
+
+  // console.log('2. File: progress', progress)
+  useEffect(() => {
+    // console.log('File: _progress', _progress)
+    const { filename, progressNum } = progress
+    if (filename !== undefined && progressNum !== undefined)
+      // console.log('setting progress')s
+      _setProgress(R.merge(_progress, { filename, progressNum }))
+  }, [progress])
+
+  // console.log('3. File: _progress', _progress)
+  return accepted ? (
+    <FileAccepted file={file} progress={_progress} />
+  ) : (
+    <FileRejected file={file} />
+  )
 }

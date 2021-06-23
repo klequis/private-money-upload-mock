@@ -14,7 +14,7 @@ const isDuplicate = (fileName, currentFileNames) =>
  */
 export async function customFileGetter(event, acctId, currentFiles) {
   // console.log('event', event)
-  // console.log('files', currentFiles)
+  // console.log('currentFiles', currentFiles)
   const currentFileNames = currentFiles.map((f) => f.name)
 
   const addProps = (file) => {
